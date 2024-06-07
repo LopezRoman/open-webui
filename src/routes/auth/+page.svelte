@@ -63,6 +63,9 @@
 		if (($config?.trusted_header_auth ?? false) || $config?.auth === false) {
 			await signInHandler();
 		}
+		if (($config?.trusted_moodle_auth ?? false) || $config?.auth === false) {
+			await signInHandler();
+		}
 	});
 </script>
 
@@ -118,6 +121,23 @@
 						</div>
 					</div>
 				</div>
+			{:else if ($config?.trusted_moodle_auth ?? false) || $config?.auth === false}
+				<div class=" my-auto pb-10 w-full">
+					<div
+						class="flex items-center justify-center gap-3 text-xl sm:text-2xl text-center font-bold dark:text-gray-200"
+					>
+						<div>
+							{$i18n.t('Signing in')}
+							{$i18n.t('to')}
+							{$WEBUI_NAME}
+							{$i18n.t('via Moodle')}
+						</div>
+
+						<div>
+							<Spinner />
+						</div>
+					</div>
+				</div>	
 			{:else}
 				<div class="  my-auto pb-10 w-full dark:text-gray-100">
 					<form

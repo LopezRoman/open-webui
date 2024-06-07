@@ -33,7 +33,7 @@ from utils.utils import (
 from utils.misc import parse_duration, validate_email_format
 from utils.webhook import post_webhook
 from constants import ERROR_MESSAGES, WEBHOOK_MESSAGES
-from config import WEBUI_AUTH, WEBUI_AUTH_TRUSTED_EMAIL_HEADER
+from config import WEBUI_AUTH, WEBUI_AUTH_TRUSTED_EMAIL_HEADER, WEBUI_AUTH_TRUSTED_MOODLE
 
 router = APIRouter()
 
@@ -84,7 +84,7 @@ async def update_profile(
 async def update_password(
     form_data: UpdatePasswordForm, session_user=Depends(get_current_user)
 ):
-    if WEBUI_AUTH_TRUSTED_EMAIL_HEADER:
+    if WEBUI_AUTH_TRUSTED_EMAIL_HEADER or WEBUI_AUTH_TRUSTED_MOODLE:
         raise HTTPException(400, detail=ERROR_MESSAGES.ACTION_PROHIBITED)
     if session_user:
         user = Auths.authenticate_user(session_user.email, form_data.password)
@@ -118,6 +118,19 @@ async def signin(request: Request, form_data: SigninForm):
                 ),
             )
         user = Auths.authenticate_user_by_trusted_header(trusted_email)
+    elif WEBUI_AUTH_TRUSTED_MOODLE:
+        if WEBUI_AUTH_TRUSTED_MOODLE not in request.headers:
+            raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_TRUSTED_MOODLE)
+
+        trusted_moodle = request.headers[WEBUI_AUTH_TRUSTED_MOODLE].lower()
+        if not Users.get_user_by_email(trusted_moodle.lower()):
+            await signup(
+                request,
+                SignupForm(
+                    email=trusted_moodle, password=str(uuid.uuid4()), name=trusted_moodle
+                ),
+            )
+        user = Auths.authenticate_user_by_trusted_moodle(trusted_moodle)
     elif WEBUI_AUTH == False:
         admin_email = "admin@localhost"
         admin_password = "admin"
