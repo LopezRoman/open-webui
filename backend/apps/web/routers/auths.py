@@ -33,7 +33,7 @@ from utils.utils import (
 from utils.misc import parse_duration, validate_email_format
 from utils.webhook import post_webhook
 from constants import ERROR_MESSAGES, WEBHOOK_MESSAGES
-from config import WEBUI_AUTH, WEBUI_AUTH_TRUSTED_EMAIL_HEADER
+from config import WEBUI_AUTH, WEBUI_AUTH_TRUSTED_EMAIL_HEADER, TRUSTED_MOODLE_COOKIE_NAME
 
 router = APIRouter()
 
@@ -118,6 +118,21 @@ async def signin(request: Request, form_data: SigninForm):
                 ),
             )
         user = Auths.authenticate_user_by_trusted_header(trusted_email)
+    elif TRUSTED_MOODLE_COOKIE_NAME:
+        body = await request.json()
+        cookie_email = body.get('email', '').lower()
+        if not cookie_email:
+            raise HTTPException(400, detail=ERROR_MESSAGES.INVALID_MOODLE_COOKIE_NAME)
+
+        trusted_email = cookie_email
+        if not Users.get_user_by_email(cookie_email):
+            await signup(
+                request,
+                SignupForm(
+                    email=cookie_email, password=str(uuid.uuid4()), name=cookie_email
+                ),
+            )
+        user = Auths.authenticate_user_by_trusted_cookie(cookie_email)
     elif WEBUI_AUTH == False:
         admin_email = "admin@localhost"
         admin_password = "admin"

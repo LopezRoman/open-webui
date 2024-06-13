@@ -27,15 +27,6 @@
 		}
 	};
 
-    function getCookie(cookie_name) {
-		const cookieString = `; ${document.cookie}`;
-		const parts = cookieString.split(`; ${cookie_name}=`);
-		if (parts.length === 2) {
-			return parts.pop().split(';').shift().trim();
-		}
-		return null;
-	}
-
 	const signInHandler = async () => {
 		const sessionUser = await userSignIn(email, password).catch((error) => {
 			toast.error(error);
@@ -62,6 +53,15 @@
 		} else {
 			await signUpHandler();
 		}
+	};
+
+	function getCookie(cookie_name) {
+		const cookieString = `; ${document.cookie}`;
+		const parts = cookieString.split(`; ${cookie_name}=`);
+		if (parts.length === 2) {
+			return parts.pop().split(';').shift().trim();
+		}
+		return null;
 	};
 
 	onMount(async () => {
