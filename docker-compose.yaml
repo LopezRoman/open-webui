@@ -22,7 +22,8 @@ services:
       - ollama
     environment:
       - 'OLLAMA_BASE_URL=http://ollama:11434'
-      - 'WEBUI_AUTH_TRUSTED_EMAIL_HEADER=X-Moodle-User-Email'
+      #- 'WEBUI_AUTH_TRUSTED_EMAIL_HEADER=X-Moodle-User-Email'
+      - 'TRUSTED_MOODLE_COOKIE_NAME=MoodleEmail'
       - 'WEBUI_SECRET_KEY='
     extra_hosts:
       - host.docker.internal:host-gateway

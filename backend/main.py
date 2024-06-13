@@ -59,6 +59,7 @@ from config import (
     SRC_LOG_LEVELS,
     WEBHOOK_URL,
     ENABLE_ADMIN_EXPORT,
+    TRUSTED_MOODLE_COOKIE_NAME,
     AppConfig,
 )
 from constants import ERROR_MESSAGES
@@ -278,6 +279,7 @@ async def get_app_config():
         "default_models": webui_app.state.config.DEFAULT_MODELS,
         "default_prompt_suggestions": webui_app.state.config.DEFAULT_PROMPT_SUGGESTIONS,
         "trusted_header_auth": bool(webui_app.state.AUTH_TRUSTED_EMAIL_HEADER),
+        "trusted_moodle_cookie_name": TRUSTED_MOODLE_COOKIE_NAME,
         "admin_export_enabled": ENABLE_ADMIN_EXPORT,
     }
 
