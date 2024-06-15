@@ -159,8 +159,8 @@ class AuthsTable:
         except:
             return None
         
-    def authenticate_user_by_trusted_moodle(self, email: str) -> Optional[UserModel]:
-        log.info(f"authenticate_user_by_trusted_moodle: {email}")
+    def authenticate_user_by_trusted_cookie(self, email: str) -> Optional[UserModel]:
+        log.info(f"authenticate_user_by_trusted_cookie: {email}")
         try:
             auth = Auth.get(Auth.email == email, Auth.active == True)
             if auth:

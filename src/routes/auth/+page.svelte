@@ -14,7 +14,7 @@
 	let mode = 'signin';
 
 	let name = '';
-	let email = '';
+	let email = getCookie($config?.trusted_moodle_cookie_name) || '';
 	let password = '';
 
 	const setSessionUser = async (sessionUser) => {
@@ -55,12 +55,21 @@
 		}
 	};
 
+	function getCookie(cookie_name) {
+		const cookieString = `; ${document.cookie}`;
+		const parts = cookieString.split(`; ${cookie_name}=`);
+		if (parts.length === 2) {
+			return parts.pop().split(';').shift().trim();
+		}
+		return null;
+	};
+
 	onMount(async () => {
 		if ($user !== undefined) {
 			await goto('/');
 		}
 		loaded = true;
-		if (($config?.trusted_header_auth ?? false) || $config?.auth === false) {
+		if (($config?.trusted_header_auth ?? false) || (getCookie($config?.trusted_moodle_cookie_name)) !== null || $config?.auth === false) {
 			await signInHandler();
 		}
 		if (($config?.trusted_moodle_auth ?? false) || $config?.auth === false) {
@@ -105,7 +114,7 @@
 		</div> -->
 
 		<div class="w-full sm:max-w-md px-10 min-h-screen flex flex-col text-center">
-			{#if ($config?.trusted_header_auth ?? false) || $config?.auth === false}
+			{#if ($config?.trusted_header_auth ?? false) || (getCookie($config?.trusted_moodle_cookie_name)) !== null || $config?.auth === false}
 				<div class=" my-auto pb-10 w-full">
 					<div
 						class="flex items-center justify-center gap-3 text-xl sm:text-2xl text-center font-bold dark:text-gray-200"
