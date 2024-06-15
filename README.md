@@ -135,6 +135,20 @@ Don't forget to explore our sibling project, [Open WebUI Community](https://open
   ```bash
   docker run -d -p 3000:8080 -e OLLAMA_BASE_URL=https://example.com -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main
   ```
+  
+  Another example:
+  
+  ```bash
+  docker run -d -p 8080:8080 -e OLLAMA_BASE_URL=http://192.168.1.8:11434 -v open-webui:/app/backend/data --name open-webui --restart always ghcr.io/open-webui/open-webui:main
+  ```
+  
+  To ensure a proper connection to Ollama, the `OLLAMA_HOST` variable needs to be set to `OLLAMA_HOST=0.0.0.0:11434` to tell Ollama to listen to any connection. For a persistent variable, this should be set as a system environment variable on the Ollama server.
+
+  To verify a proper environment variable call `ollama serve` and see:
+  
+  ```bash
+  msg="Listening on [::]:11434 (version 0.1.28)"
+  ```
 
   - **To run Open WebUI with Nvidia GPU support**, use this command:
 
