@@ -24,6 +24,11 @@
 	import ModelEditor from '$lib/components/workspace/Models/ModelEditor.svelte';
 	import { toast } from 'svelte-sonner';
 	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
+	import Cog6 from '$lib/components/icons/Cog6.svelte';
+	import ConfigureModelsModal from './Models/ConfigureModelsModal.svelte';
+	import Wrench from '$lib/components/icons/Wrench.svelte';
+	import ArrowDownTray from '$lib/components/icons/ArrowDownTray.svelte';
+	import ManageModelsModal from './Models/ManageModelsModal.svelte';
 
 	let importFiles;
 	let modelsImportInputElement: HTMLInputElement;
@@ -35,12 +40,21 @@
 
 	let filteredModels = [];
 	let selectedModelId = null;
-	let showResetModal = false;
+
+	let showConfigModal = false;
+	let showManageModal = false;
 
 	$: if (models) {
-		filteredModels = models.filter(
-			(m) => searchValue === '' || m.name.toLowerCase().includes(searchValue.toLowerCase())
-		);
+		filteredModels = models
+			.filter((m) => searchValue === '' || m.name.toLowerCase().includes(searchValue.toLowerCase()))
+			.sort((a, b) => {
+				// // Check if either model is inactive and push them to the bottom
+				// if ((a.is_active ?? true) !== (b.is_active ?? true)) {
+				// 	return (b.is_active ?? true) - (a.is_active ?? true);
+				// }
+				// If both models' active states are the same, sort alphabetically
+				return a.name.localeCompare(b.name);
+			});
 	}
 
 	let searchValue = '';
@@ -114,12 +128,11 @@
 			}).catch((error) => {
 				return null;
 			});
-
-			await init();
 		} else {
 			await toggleModelById(localStorage.token, model.id);
 		}
 
+		// await init();
 		_models.set(await getModels(localStorage.token));
 	};
 
@@ -128,18 +141,8 @@
 	});
 </script>
 
-<ConfirmDialog
-	title={$i18n.t('Delete All Models')}
-	message={$i18n.t('This will delete all models including custom models and cannot be undone.')}
-	bind:show={showResetModal}
-	onConfirm={async () => {
-		const res = deleteAllModels(localStorage.token);
-		if (res) {
-			toast.success($i18n.t('All models deleted successfully'));
-			init();
-		}
-	}}
-/>
+<ConfigureModelsModal bind:show={showConfigModal} initHandler={init} />
+<ManageModelsModal bind:show={showManageModal} />
 
 {#if models !== null}
 	{#if selectedModelId === null}
@@ -153,18 +156,28 @@
 					>
 				</div>
 
-				<div>
-					<Tooltip content={$i18n.t('This will delete all models including custom models')}>
+				<div class="flex items-center gap-1.5">
+					<Tooltip content={$i18n.t('Manage Models')}>
 						<button
-							class=" px-2.5 py-1 rounded-full flex gap-1 items-center"
+							class=" p-1 rounded-full flex gap-1 items-center"
 							type="button"
 							on:click={() => {
-								showResetModal = true;
+								showManageModal = true;
 							}}
 						>
-							<div class="text-xs flex-shrink-0">
-								{$i18n.t('Reset')}
-							</div>
+							<ArrowDownTray />
+						</button>
+					</Tooltip>
+
+					<Tooltip content={$i18n.t('Settings')}>
+						<button
+							class=" p-1 rounded-full flex gap-1 items-center"
+							type="button"
+							on:click={() => {
+								showConfigModal = true;
+							}}
+						>
+							<Cog6 />
 						</button>
 					</Tooltip>
 				</div>
@@ -186,7 +199,7 @@
 
 		<div class=" my-2 mb-5" id="model-list">
 			{#if models.length > 0}
-				{#each filteredModels as model (model.id)}
+				{#each filteredModels as model, modelIdx (model.id)}
 					<div
 						class=" flex space-x-4 cursor-pointer w-full px-3 py-2 dark:hover:bg-white/5 hover:bg-black/5 rounded-lg transition"
 						id="model-item-{model.id}"
